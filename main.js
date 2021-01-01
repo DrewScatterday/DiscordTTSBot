@@ -5,6 +5,7 @@ var auth = require('./auth.json');
 const Stream = require('stream');
 
 
+let timeoutID;
 const client = new Discord.Client();
 const prefix = '$'; 
 const Polly = new AWS.Polly({
@@ -29,41 +30,40 @@ function getTTS(msg, text) {
             return err;
         }
         if (data.AudioStream instanceof Buffer) {
-            playSound(msg, data);
+            // convert audiostream to buffer 
+            var bufferStream = new Stream.PassThrough();
+            bufferStream.end(data.AudioStream)
+            playSound(msg, bufferStream);
         }
     });
 }
 
-function playSound(msg, soundData) {
+function playSound(msg, buf) {
     var voiceChannel = msg.member.voice.channel;
-    
-    voiceChannel.join()
-    .then(connection => {
-        var bufferStream = new Stream.PassThrough();
-        bufferStream.end(soundData.AudioStream);
-        const dispatcher = connection.play(bufferStream);
+    if (!msg.guild.me.voice.channel) { // not in voice channel 
+        clearTimeout(timeoutID);
+        voiceChannel.join()
+        .then(connection => {
+            const dispatcher = connection.play(buf);
+            dispatcher.on("finish", end => {
+                console.log("we joined");
+                // Leave voice channel after 5 minutes
+                timeoutID = setTimeout(() => {
+                    voiceChannel.leave();
+                  }, 5 * 60 * 1000) 
+            });
+        })
+    } else { // else already in a voice chat 
+        clearTimeout(timeoutID);
+        const dispatcher = msg.guild.voice.connection.play(buf);
         dispatcher.on("finish", end => {
-            voiceChannel.leave();
-            //deleteFile(fileName);
-            m_currentPlaying = "";
+            // Leave voice channel after 5 minutes
+            console.log("we already in here");
+             timeoutID = setTimeout(() => {
+                voiceChannel.leave();
+              }, 5 * 60 * 1000) 
         });
-    })
-    
-    
-   
-    // TO DO: Change this to let the bot stay in the voice channel and listen for commands: 
-
-    //if (!msg.guild.me.voice.channel) {
-    // else { // else already in a voice chat 
-    //     m_currentPlaying = fileName;
-    //     const dispatcher = msg.guild.voice.connection.play(fileName);
-    //     dispatcher.on("finish", end => {
-    //         //voiceChannel.leave();
-    //         deleteFile(fileName);
-    //         m_currentPlaying = "";
-    //     });
-    // }
-   
+    }  
 }
 
 client.on('ready', () => {
