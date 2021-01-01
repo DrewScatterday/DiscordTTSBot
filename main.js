@@ -68,7 +68,8 @@ function playSound(msg, fileName) {
         });
     })
     
-
+    // TO DO: Change this to let the bot stay in the voice channel and listen for commands: 
+    
     //if (!msg.guild.me.voice.channel) {
     // else { // else already in a voice chat 
     //     m_currentPlaying = fileName;
