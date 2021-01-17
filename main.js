@@ -1,6 +1,5 @@
 var AWS = require('aws-sdk');
 const Discord = require('discord.js'); 
-const fs = require('fs');
 var auth = require('./auth.json');
 const Stream = require('stream');
 
