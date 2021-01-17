@@ -26,7 +26,6 @@ function getTTS(msg, text) {
 
     Polly.synthesizeSpeech(params, (err, data) => {
         if (err) {
-            console.log("Error getting from polly");
             return err;
         }
         if (data.AudioStream instanceof Buffer) {
@@ -40,25 +39,37 @@ function getTTS(msg, text) {
 
 function playSound(msg, buf) {
     var voiceChannel = msg.member.voice.channel;
-    if (!msg.guild.me.voice.channel) { // not in voice channel 
+
+    if (!voiceChannel) // user not in a voice channel
+    {
+        msg.reply("Please join a voice channel first!");
+        return;
+    }
+
+    if (!msg.guild.me.voice.channel) { // bot not in voice channel 
         clearTimeout(timeoutID);
+
         voiceChannel.join()
         .then(connection => {
             const dispatcher = connection.play(buf);
             dispatcher.on("finish", end => {
-                console.log("we joined");
+                console.log("Bot joined voice channel");
+
                 // Leave voice channel after 5 minutes
                 timeoutID = setTimeout(() => {
                     voiceChannel.leave();
                   }, 5 * 60 * 1000) 
             });
         })
-    } else { // else already in a voice chat 
+    } 
+    else { // bot already in a voice chat 
         clearTimeout(timeoutID);
         const dispatcher = msg.guild.voice.connection.play(buf);
+        
         dispatcher.on("finish", end => {
+            console.log("Bot was already in voice channel");
+
             // Leave voice channel after 5 minutes
-            console.log("we already in here");
              timeoutID = setTimeout(() => {
                 voiceChannel.leave();
               }, 5 * 60 * 1000) 
@@ -72,31 +83,61 @@ client.on('ready', () => {
   
 client.on('message', async msg => {
     if(!msg.content.startsWith(prefix) || msg.author.bot) return; 
- 
-    const args = msg.content.slice(prefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
-
-    if (command === 'tts') {
-        if (msg.member.voice.channel) {
-            var sentence = args.join(" ");
+    
+    // Handle one word commands 
+    if (!msg.content.includes(' ')) {
+        var command = msg.content.slice(prefix.length).trim();
+        if (command === 'beatbox') {
             try {
-                getTTS(msg, sentence);
+                getTTS(msg, "my beatbox goes ᴶᴳᴾ,ᴶᴳᴰ,ᴶᴳᴾ,ᴶᴳᵀ,ᴶᴳᴾ,ᴶᴳᴰ,ᴶᴳᴾ,ᴶᴳᵀ,ᴶᴳᴾ,ᴶᴳᴰ,ᴶᴳᴾ,ᴶᴳᵀ,ᴶᴳᴾ,ᴶᴳᴰ,ᴶᴳᴾ,ᴶᴳᵀᴷᴶᴷᴶᴷᴶᴷᴶ");
             }
             catch(err) {
                 msg.reply("There was an error with that command, I'm sorry");
                 console.log(err);
-                return; 
             }
         }
+        else if (command === 'manual') {
+            msg.reply("https://docs.google.com/document/d/1qLKdc3QArtn6PVuGf42EfoMuzvLE_ykWwU1RViEcrbU/edit");
+        }
+        else if (command === 'stop') {
+            if (msg.member.voice.channel) 
+            {
+                msg.guild.voice.connection.dispatcher.destroy();
+                msg.guild.voice.connection.disconnect();
+            }
+        }
+        else if (command === 'help') {
+            msg.channel.send(`
+            Supported commands:
+            **$help** - Displays the help menu
+            **$manual** - Displays a TTS Manual Google Doc for using Brian. Made by gshredder
+            **$stop** - Stops Brian while he is speaking
+            **$tts <sentence to be read>** - Get Brian to read a sentence
+            **$beatbox** - Sick beatz 
+            `)
+        }
+        return; 
     }
-    else if (command === 'manual') {
-        msg.reply("https://docs.google.com/document/d/1qLKdc3QArtn6PVuGf42EfoMuzvLE_ykWwU1RViEcrbU/edit");
+
+    // Handle tts command with arguments
+    var delimPos = msg.content.indexOf(' ');
+    if (delimPos <= 0) {
+        msg.reply("There was an error with that command, I'm sorry");
+        return;
     }
-    else if (command === 'stop') {
-        if (msg.member.voice.channel) 
-        {
-            msg.guild.voice.connection.dispatcher.destroy();
-            msg.guild.voice.connection.disconnect();
+
+    var command = msg.content.substr(0, delimPos).trim();
+    var sentence = msg.content.substr(delimPos + 1).trim();
+    command = command.slice(prefix.length);
+
+    if (command === 'tts') {
+        try {
+            getTTS(msg, sentence);
+        }
+        catch(err) {
+            msg.reply("There was an error with that command, I'm sorry");
+            console.log(err);
+            return; 
         }
     }
 });
