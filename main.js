@@ -39,8 +39,7 @@ function getTTS(msg, text) {
 function playSound(msg, buf) {
     var voiceChannel = msg.member.voice.channel;
 
-    if (!voiceChannel) // user not in a voice channel
-    {
+    if (!voiceChannel) { // user not in a voice channel
         msg.reply("Please join a voice channel first!");
         return;
     }
@@ -74,9 +73,8 @@ function playSound(msg, buf) {
     else { // bot already in a voice channel
         clearTimeout(timeoutID);
 
-        if (msg.guild.voice.connection == null) 
-        {
-            msg.reply("Sorry there was an error playing that command, please try again or try disconnecting me from the voice channel.");
+        if (msg.guild.voice.connection == null) {
+            msg.reply("Sorry there was an error establishing a voice connection, please try again or try disconnecting me from the voice channel.");
             return;
         }
 
@@ -122,10 +120,11 @@ client.on('message', async msg => {
             msg.reply("https://docs.google.com/document/d/1qLKdc3QArtn6PVuGf42EfoMuzvLE_ykWwU1RViEcrbU/edit");
         }
         else if (command === 'stop') {
-            if (msg.member.voice.channel) 
-            {
-                msg.guild.voice.connection.dispatcher.destroy();
-                msg.guild.voice.connection.disconnect();
+            if (msg.member.voice.channel) {
+                if (msg.guild.voice.connection && msg.guild.voice.connection.dispatcher) {
+                    msg.guild.voice.connection.dispatcher.destroy();
+                    msg.guild.voice.connection.disconnect();
+                }
             }
         }
         else if (command === 'help') {
