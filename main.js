@@ -66,8 +66,20 @@ function playSound(msg, buf) {
             msg.reply("Error joining voice channel. Please make sure I have the correct role permissions to join your voice channel.")
         });
     } 
-    else { // bot already in a voice chat 
+
+    else if(msg.member.voice.channel != msg.guild.me.voice.channel) { // bot not in the same voice channel 
+        msg.reply("I'm currently in another voice channel. Please make sure I'm in your voice channel!");
+    }
+
+    else { // bot already in a voice channel
         clearTimeout(timeoutID);
+
+        if (msg.guild.voice.connection == null) 
+        {
+            msg.reply("Sorry there was an error playing that command, please try again or try disconnecting me from the voice channel.");
+            return;
+        }
+
         const dispatcher = msg.guild.voice.connection.play(buf);
         
         dispatcher.on("finish", end => {
@@ -77,6 +89,12 @@ function playSound(msg, buf) {
              timeoutID = setTimeout(() => {
                 voiceChannel.leave();
               }, 5 * 60 * 1000) 
+        });
+        
+        dispatcher.on('error', err => {
+            console.log("Error playing into voice channel:");
+            console.log(err);
+            msg.reply("Sorry there was an error playing that command, please try again or try disconnecting me from the voice channel.");
         });
     }  
 }
