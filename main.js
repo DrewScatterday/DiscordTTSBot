@@ -67,7 +67,7 @@ function playSound(msg, buf) {
     } 
 
     else if(msg.member.voice.channel != msg.guild.me.voice.channel) { // bot not in the same voice channel 
-        msg.reply("I'm currently in another voice channel. Please make sure I'm in your voice channel!");
+        msg.reply("I'm currently in another voice channel. Please make sure I'm in your voice channel or not in a voice channel!");
     }
 
     else { // bot already in a voice channel
