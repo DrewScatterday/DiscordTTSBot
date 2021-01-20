@@ -51,6 +51,7 @@ function playSound(msg, buf) {
         voiceChannel.join()
         .then(connection => {
             const dispatcher = connection.play(buf);
+
             dispatcher.on("finish", end => {
                 console.log("Bot joined voice channel");
 
@@ -59,7 +60,11 @@ function playSound(msg, buf) {
                     voiceChannel.leave();
                   }, 5 * 60 * 1000) 
             });
-        })
+
+        }).catch(e => { 
+            console.log("Error joining voice channel");
+            msg.reply("Error joining voice channel. Please make sure I have the correct role permissions to join your voice channel.")
+        });
     } 
     else { // bot already in a voice chat 
         clearTimeout(timeoutID);
