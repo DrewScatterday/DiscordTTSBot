@@ -25,6 +25,7 @@ I wrote this Discord bot so my friends and I could mess around with the text to 
 ## Usage 
 To invite the bot to your discord server:
 * Use this discord bot invite [link](https://discord.com/oauth2/authorize?client_id=793354487699865611&scope=bot&permissions=37030976)  
+* Here is the discord.bots.gg [page](https://discord.bots.gg/bots/793354487699865611)
 * Here is the top.gg discord bot [page](https://top.gg/bot/793354487699865611)
 
 To run the source code on your machine:
