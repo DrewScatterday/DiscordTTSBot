@@ -1,12 +1,12 @@
 var AWS = require('aws-sdk');
 const Discord = require('discord.js'); 
-var auth = require('./auth.json');
+var auth = require('./testingauth.json');
 const Stream = require('stream');
 
 
-let timeoutID;
+var voiceInactiveDict = {};
 const client = new Discord.Client();
-const prefix = '$'; 
+const prefix = '!'; 
 const Polly = new AWS.Polly({
     region: 'us-east-1',
     accessKeyId: auth.accessKey,
@@ -45,7 +45,6 @@ function playSound(msg, buf) {
     }
 
     if (!msg.guild.me.voice.channel) { // bot not in voice channel 
-        clearTimeout(timeoutID);
 
         voiceChannel.join()
         .then(connection => {
@@ -54,10 +53,9 @@ function playSound(msg, buf) {
             dispatcher.on("finish", end => {
                 console.log("Bot joined voice channel");
 
-                // Leave voice channel after 5 minutes
-                timeoutID = setTimeout(() => {
-                    voiceChannel.leave();
-                  }, 5 * 60 * 1000) 
+                // Store voice channel msg.guild.me.voice.channel object and current timestamp in a dict
+                voiceInactiveDict[msg.guild.me.voice.channel] = new Date();
+                console.log(voiceInactiveDict);
             });
 
         }).catch(e => { 
@@ -71,8 +69,6 @@ function playSound(msg, buf) {
     }
 
     else { // bot already in a voice channel
-        clearTimeout(timeoutID);
-
         if (msg.guild.voice.connection == null) {
             msg.reply("Sorry there was an error establishing a voice connection, please try again or try disconnecting me from the voice channel.");
             return;
@@ -82,11 +78,10 @@ function playSound(msg, buf) {
         
         dispatcher.on("finish", end => {
             console.log("Bot was already in voice channel");
-
-            // Leave voice channel after 5 minutes
-             timeoutID = setTimeout(() => {
-                voiceChannel.leave();
-              }, 5 * 60 * 1000) 
+            
+            // Store voice channel msg.guild.me.voice.channel object and current timestamp in a dict
+            voiceInactiveDict[msg.guild.me.voice.channel] = new Date();
+            console.log(voiceInactiveDict);
         });
         
         dispatcher.on('error', err => {
@@ -95,6 +90,40 @@ function playSound(msg, buf) {
             msg.reply("Sorry there was an error playing that command, please try again or try disconnecting me from the voice channel.");
         });
     }  
+}
+
+function purgeInactiveGuilds() {
+    console.log("Checking inactive voice channels");
+
+    // loop through voice channel objects in dict 
+    for (var voiceChannel in voiceInactiveDict)
+    {
+        var lastCommandTime = voiceInactiveDict[voiceChannel];
+
+        // check if current time - the time stored in dict is greater than 10 minutes
+        var currentTime = new Date();
+        var diff = Math.abs(currentTime - lastCommandTime) / 1000;
+        console.log(diff);
+        var minutesDiff = Math.floor(diff / 60) % 60;
+        console.log(minutesDiff);
+        if (minutesDiff > 1) // change this to 10m
+        {
+            console.log(voiceChannel);
+            // if it is leave the voice channel for that guild 
+            voiceChannel.leave();
+
+            // delete it from dict 
+            delete voiceInactiveDict[voiceChannel];
+        }
+
+
+        // else 
+        // {
+        //     setInterval(function() {
+        //         isInactive(msg);
+        //     }, 60 * 1000); // 60 * 1000 milsec
+        // }
+    }
 }
 
 client.on('ready', () => {
@@ -162,6 +191,10 @@ client.on('message', async msg => {
         }
     }
 });
+
+setInterval(function() {
+    purgeInactiveGuilds();
+}, 60 * 1000); // 60 * 1000 milsec
 
 client.login(auth.token);
 
