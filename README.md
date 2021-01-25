@@ -9,6 +9,8 @@ I wrote this Discord bot so my friends and I could mess around with the text to 
 * **$stop** - Stops Brian while he is speaking
 * **$tts [sentence to be read]** - Get Brian to read a sentence
 * **$beatbox** - Sick beatz 
+* **$invite** - A bot invite link to share with your friends
+* **$support** - Support the bot by upvoting it on top.gg
 
 
 ## Built with:

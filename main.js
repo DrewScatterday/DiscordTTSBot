@@ -4,7 +4,7 @@ var auth = require('./auth.json');
 const Stream = require('stream');
 
 
-let timeoutID;
+var guildIDTimeouts = {};
 const client = new Discord.Client();
 const prefix = '$'; 
 const Polly = new AWS.Polly({
@@ -45,8 +45,6 @@ function playSound(msg, buf) {
     }
 
     if (!msg.guild.me.voice.channel) { // bot not in voice channel 
-        clearTimeout(timeoutID);
-
         voiceChannel.join()
         .then(connection => {
             const dispatcher = connection.play(buf);
@@ -54,10 +52,12 @@ function playSound(msg, buf) {
             dispatcher.on("finish", end => {
                 console.log("Bot joined voice channel");
 
-                // Leave voice channel after 5 minutes
-                timeoutID = setTimeout(() => {
+                // Leave voice channel after 7 minutes of inactivity
+                guildIDTimeouts[msg.guild.id] = setTimeout(() => {
                     voiceChannel.leave();
-                  }, 5 * 60 * 1000) 
+                    delete guildIDTimeouts[msg.guild.id];
+                    console.log("I left the guild " + msg.guild.id + " because I was inactive");
+                  }, 7 * 60 * 1000) 
             });
 
         }).catch(e => { 
@@ -71,7 +71,7 @@ function playSound(msg, buf) {
     }
 
     else { // bot already in a voice channel
-        clearTimeout(timeoutID);
+        clearTimeout(guildIDTimeouts[msg.guild.id]);
 
         if (msg.guild.voice.connection == null) {
             msg.reply("Sorry there was an error establishing a voice connection, please try again or try disconnecting me from the voice channel.");
@@ -82,11 +82,13 @@ function playSound(msg, buf) {
         
         dispatcher.on("finish", end => {
             console.log("Bot was already in voice channel");
-
-            // Leave voice channel after 5 minutes
-             timeoutID = setTimeout(() => {
+            
+            // Leave voice channel after 7 minutes of inactivity
+            guildIDTimeouts[msg.guild.id] = setTimeout(() => {
                 voiceChannel.leave();
-              }, 5 * 60 * 1000) 
+                delete guildIDTimeouts[msg.guild.id];
+                console.log("I left the guild " + msg.guild.id + " because I was inactive");
+              }, 7 * 60 * 1000) 
         });
         
         dispatcher.on('error', err => {
@@ -127,15 +129,34 @@ client.on('message', async msg => {
                 }
             }
         }
-        else if (command === 'help') {
-            msg.channel.send(`
-            Supported commands:
-            **$help** - Displays the help menu
-            **$manual** - Displays a TTS Manual Google Doc for using Brian. Made by gshredder
-            **$stop** - Stops Brian while he is speaking
-            **$tts <sentence to be read>** - Get Brian to read a sentence
-            **$beatbox** - Sick beatz 
+        else if (command === 'invite') {
+            var embed = new Discord.MessageEmbed()
+            .setDescription(`
+            If you'd like to send this bot to your friends use this top.gg [link](https://top.gg/bot/793354487699865611)
             `)
+            msg.channel.send(embed);
+        }
+        else if (command === 'support') {
+            var embed = new Discord.MessageEmbed()
+            .setDescription(`
+            If you enjoy this bot and want to support it please upvote it on [top.gg](https://top.gg/bot/793354487699865611/vote)
+            `)
+            msg.channel.send(embed);
+        }
+        else if (command === 'help') {
+            var embed = new Discord.MessageEmbed()
+            .setAuthor("Supported commands")
+            .setThumbnail(client.user.displayAvatarURL)
+            .setDescription(`
+            - **$help** - Displays the help menu
+            - **$manual** - Displays a TTS Manual Google Doc for using Brian. Made by gshredder
+            - **$stop** - Stops Brian while he is speaking
+            - **$tts <sentence to be read>** - Get Brian to read a sentence
+            - **$beatbox** - Sick beatz 
+            - **$invite** - A bot invite link to share with your friends
+            - **$support** - Support the bot by upvoting it on top.gg 
+            `)
+            msg.channel.send(embed);
         }
         return; 
     }
