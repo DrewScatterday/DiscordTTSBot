@@ -126,6 +126,9 @@ client.on('message', async msg => {
                 if (msg.guild.me.voice.channel != null && msg.guild.voice.connection != null && msg.guild.voice.connection.dispatcher != null) {
                     msg.guild.voice.connection.dispatcher.destroy();
                     msg.guild.voice.connection.disconnect();
+                    if (msg.guild.id in guildIDTimeouts) {
+                        delete guildIDTimeouts[msg.guild.id];
+                    }
                 }
             }
         }
