@@ -121,7 +121,7 @@ client.on('message', async msg => {
         }
         else if (command === 'stop') {
             if (msg.member.voice.channel) {
-                if (msg.guild.voice.connection && msg.guild.voice.connection.dispatcher) {
+                if (msg.guild.me.voice.channel != null && msg.guild.voice.connection != null && msg.guild.voice.connection.dispatcher != null) {
                     msg.guild.voice.connection.dispatcher.destroy();
                     msg.guild.voice.connection.disconnect();
                 }
