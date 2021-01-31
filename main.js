@@ -37,12 +37,12 @@ function getTTS(msg, text) {
 }
 
 function playSound(msg, buf) {
-    var voiceChannel = msg.member.voice.channel;
-
-    if (!voiceChannel) { // user not in a voice channel
+    if (!msg.member.voice.channel) { // user not in a voice channel
         msg.reply("Please join a voice channel first!");
         return;
     }
+
+    var voiceChannel = msg.member.voice.channel;
 
     if (!msg.guild.me.voice.channel) { // bot not in voice channel 
         voiceChannel.join()
