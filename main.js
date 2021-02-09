@@ -37,7 +37,7 @@ function getTTS(msg, text) {
 }
 
 function playSound(msg, buf) {
-    if (!msg.member.voice.channel) { // user not in a voice channel
+    if (msg.member.voice.channel == null) { // user not in a voice channel
         msg.reply("Please join a voice channel first!");
         return;
     }
