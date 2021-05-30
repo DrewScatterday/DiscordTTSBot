@@ -28,10 +28,17 @@ function getTTS(msg, text) {
             return err;
         }
         if (data.AudioStream instanceof Buffer) {
-            // convert audiostream to buffer 
-            var bufferStream = new Stream.PassThrough();
-            bufferStream.end(data.AudioStream)
-            playSound(msg, bufferStream);
+            try { 
+                // convert audiostream to buffer 
+                var bufferStream = new Stream.PassThrough();
+                bufferStream.end(data.AudioStream);
+                playSound(msg, bufferStream);
+            }
+            catch(err) {
+                msg.reply("There was an error with that command, I'm sorry");
+                console.log(err);
+                return; 
+            }
         }
     });
 }
@@ -54,7 +61,7 @@ function playSound(msg, buf) {
 
                 // Leave voice channel after 7 minutes of inactivity
                 guildIDTimeouts[msg.guild.id] = setTimeout(() => {
-                    voiceChannel.leave();
+                    msg.guild.me.voice.channel.leave();
                     delete guildIDTimeouts[msg.guild.id];
                     console.log("I left the guild " + msg.guild.id + " because I was inactive");
                   }, 7 * 60 * 1000) 
@@ -85,7 +92,7 @@ function playSound(msg, buf) {
             
             // Leave voice channel after 7 minutes of inactivity
             guildIDTimeouts[msg.guild.id] = setTimeout(() => {
-                voiceChannel.leave();
+                msg.guild.me.voice.channel.leave();
                 delete guildIDTimeouts[msg.guild.id];
                 console.log("I left the guild " + msg.guild.id + " because I was inactive");
               }, 7 * 60 * 1000) 
