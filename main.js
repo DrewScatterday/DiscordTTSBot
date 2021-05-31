@@ -61,12 +61,9 @@ function playSound(msg, buf) {
 
                 // Leave voice channel after 7 minutes of inactivity
                 guildIDTimeouts[msg.guild.id] = setTimeout(() => {
-                    try {
-                        msg.guild.me.voice.channel.leave();
-                    }
-                    catch
+                    if(msg.guild.me.voice.channel)
                     {
-                        console.log("COULD NOT LEAVE VOICE CHANNEL");
+                        msg.guild.me.voice.channel.leave();
                     }
                     delete guildIDTimeouts[msg.guild.id];
                     console.log("I left the guild " + msg.guild.id + " because I was inactive");
@@ -98,13 +95,9 @@ function playSound(msg, buf) {
             
             // Leave voice channel after 7 minutes of inactivity
             guildIDTimeouts[msg.guild.id] = setTimeout(() => {
-                msg.guild.me.voice.channel.leave();
-                try {
-                    msg.guild.me.voice.channel.leave();
-                }
-                catch
+                if(msg.guild.me.voice.channel)
                 {
-                    console.log("COULD NOT LEAVE VOICE CHANNEL");
+                    msg.guild.me.voice.channel.leave();
                 }
                 delete guildIDTimeouts[msg.guild.id];
                 console.log("I left the guild " + msg.guild.id + " because I was inactive");
