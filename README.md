@@ -19,6 +19,7 @@ I wrote this Discord bot so my friends and I could mess around with the text to 
 * @discord.js/opus=0.3.3
 * aws-sdk=2.819.0
 * ffmpeg-static=4.2.7
+* pm2=4.5.6
 
 ## Files: 
 * main.js - The main source code file that processes all of the commands
@@ -40,3 +41,4 @@ To run the source code on your machine:
 `{"token" : "discord-bot-token-goes-here", "accessKey" : "aws-accesskey-goes-here", "secret" : "secret-access-key-goes-here"}`
 
 * Lastly, type `node main.js` in command line to run the code and your bot should appear online in your discord server 
+* If you are running this bot in a production environment use `pm2 start main.js`. Pm2 will run the node application as a service and automatically restart the app if it crashes. I found that sometimes certain discord.js libraries will throw an error that is unexpected and tough to catch. PM2 makes sure the bot always stays online even if a weird error arises. 
