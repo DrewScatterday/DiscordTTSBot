@@ -62,7 +62,7 @@ function playSound(msg, buf) {
                 // Leave voice channel after 7 minutes of inactivity
                 guildIDTimeouts[msg.guild.id] = setTimeout(() => {
                     try {
-                    msg.guild.me.voice.channel.leave();
+                        msg.guild.me.voice.channel.leave();
                     }
                     catch
                     {
