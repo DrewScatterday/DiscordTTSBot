@@ -1,6 +1,6 @@
 var AWS = require('aws-sdk');
 const Discord = require('discord.js'); 
-var auth = require('./auth.json');
+//var auth = require('./auth.json');
 const Stream = require('stream');
 
 
@@ -9,8 +9,8 @@ const client = new Discord.Client();
 const prefix = '$'; 
 const Polly = new AWS.Polly({
     region: 'us-east-1',
-    accessKeyId: auth.accessKey,
-    secretAccessKey: auth.secret
+    accessKeyId: process.env.accessKey,
+    secretAccessKey: process.env.secret
 });
 
 function getTTS(msg, text) {
@@ -200,6 +200,6 @@ client.on('message', async msg => {
     }
 });
 
-client.login(auth.token);
+client.login(process.env.token);
 
 
