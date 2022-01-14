@@ -5,7 +5,7 @@ const Stream = require('stream');
 
 
 var guildIDTimeouts = {};
-const client = new Discord.Client();
+const client = new Discord.Client({shards : 'auto'});
 const prefix = '$'; 
 const Polly = new AWS.Polly({
     region: 'us-east-1',
